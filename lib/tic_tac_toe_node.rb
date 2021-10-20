@@ -14,6 +14,8 @@ class TicTacToeNode
     if self.board.over?
       if self.board.winner == evaluator
         return false
+      elsif self.board.tied?
+        return false
       else
         return true
       end
@@ -21,9 +23,11 @@ class TicTacToeNode
       childNodes = self.children()
       childNodes.each do |child|
         # debugger
-        child.losing_node?(child.next_mover_mark)
+        if child.losing_node?(evaluator) # if any child gives the opponent a chance to win node loses
+          return true
+        end
       end
-      return false
+      return false # exited loop with no way for the opponent to win
     end
   end
 
@@ -45,10 +49,21 @@ class TicTacToeNode
     emptyTiles.each do |tile|
       newBoard = self.board.dup
       nextMark = ((self.next_mover_mark == :x) ? :o : :x)
-      newBoard[tile] = nextMark
+      newBoard[tile] = self.next_mover_mark
       newNode = TicTacToeNode.new(newBoard, nextMark, tile)
       children << newNode
     end
     return children
   end
+end
+
+
+if __FILE__ == $PROGRAM_NAME
+  node = TicTacToeNode.new(Board.new, :o)
+  node.board[[0, 0]] = :x
+  node.board[[0, 1]] = :x
+  node.board[[0, 2]] = :o
+  node.board[[1, 1]] = :o
+  node.board[[1, 0]] = :x
+  node.losing_node?(:x) #should return true
 end
