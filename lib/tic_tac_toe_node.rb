@@ -1,7 +1,8 @@
+require 'byebug'
 require_relative 'tic_tac_toe'
 
 class TicTacToeNode
-  attr_accessor :board , :next_mover_mark
+  attr_accessor :board , :next_mover_mark, :prev_move_pos
 
   def initialize(board, next_mover_mark, prev_move_pos = nil)
     @board = board
@@ -9,7 +10,21 @@ class TicTacToeNode
     @prev_move_pos = prev_move_pos
   end
 
-  def losing_node?(evaluator)
+  def losing_node?(evaluator) #evaluator should always be the computer's mark
+    if self.board.over?
+      if self.board.winner == evaluator
+        return false
+      else
+        return true
+      end
+    else
+      childNodes = self.children()
+      childNodes.each do |child|
+        # debugger
+        child.losing_node?(child.next_mover_mark)
+      end
+      return false
+    end
   end
 
   def winning_node?(evaluator)
