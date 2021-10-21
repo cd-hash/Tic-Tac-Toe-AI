@@ -10,28 +10,31 @@ class TicTacToeNode
     @prev_move_pos = prev_move_pos
   end
 
-  def losing_node?(evaluator) #evaluator should always be the computer's mark
+  def losing_node?(evaluator)
     if self.board.over?
-      if self.board.winner == evaluator
-        return false
-      elsif self.board.tied?
-        return false
-      else
-        return true
-      end
+      return self.board.won? && self.board.winner != evaluator
+    end
+    if evaluator == self.next_mover_mark
+      childNodes = self.children()
+      childNodes.all? {|child| child.losing_node?(evaluator)}
     else
       childNodes = self.children()
-      childNodes.each do |child|
-        # debugger
-        if child.losing_node?(evaluator) # if any child gives the opponent a chance to win node loses
-          return true
-        end
-      end
-      return false # exited loop with no way for the opponent to win
+      childNodes.any? {|child| child.losing_node?(evaluator)}
     end
   end
 
+
   def winning_node?(evaluator)
+    if self.board.over?
+      return self.board.won? && self.board.winner == evaluator
+    end
+    if evaluator == self.next_mover_mark
+      childNodes = self.children()
+      childNodes.any? {|child| child.winning_node?(evaluator)}
+    else
+      childNodes = self.children()
+      childNodes.all? {|child| child.winning_node?(evaluator)}
+    end
   end
 
   # This method generates an array of all moves that can be made after
@@ -58,12 +61,3 @@ class TicTacToeNode
 end
 
 
-if __FILE__ == $PROGRAM_NAME
-  node = TicTacToeNode.new(Board.new, :o)
-  node.board[[0, 0]] = :x
-  node.board[[0, 1]] = :x
-  node.board[[0, 2]] = :o
-  node.board[[1, 1]] = :o
-  node.board[[1, 0]] = :x
-  node.losing_node?(:x) #should return true
-end
